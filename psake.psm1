@@ -97,7 +97,12 @@ function ExecuteTask
             & $task.PreAction
           }
 
-          $script:context.Peek().formatTaskNameString -f $taskName
+          if ($script:context.Peek().formatTaskName -is [scriptblock]){
+            & $script:context.Peek().formatTaskName $taskName
+          } else {
+            $script:context.Peek().formatTaskName -f $taskName
+          } 
+		  
           & $task.Action
 
           if ($task.PostAction -ne $null)
@@ -314,6 +319,7 @@ TaskTearDown
       [Parameter(Position=0,Mandatory=1)][scriptblock]$cmd,
     [Parameter(Position=1,Mandatory=0)][string]$errorMessage = "Error executing command: " + $cmd
   )
+     Write-Debug "Executing $cmd"
      & $cmd
      if ($lastexitcode -ne 0)
      {
@@ -672,12 +678,15 @@ the task name.  The default is "Executing task, {0}..."
 .PARAMETER format
 A string containing the format mask to use, it should contain a placeholder ({0})
 that will be used to substitute the task name.
+Or it is a scriptblock that takes one parameter and writes the task name itself.
 Required
 
 .EXAMPLE
 A sample build script is shown below:
 
 FormatTaskName "[Task: {0}]"
+#or 
+# FormatTaskName { write-host "[Task: $args]" -foreground Blue }
 
 Task default -depends Test
 
@@ -725,9 +734,10 @@ Assert
     DefaultParameterSetName="")]
   param(
   [Parameter(Position=0,Mandatory=1)]
-  [string]$format
+  [ValidateScript({$_ -is [scriptblock] -or $_ -is [string]})]
+  [PsObject]$format
   )
-  $script:context.Peek().formatTaskNameString = $format
+  $script:context.Peek().formatTaskName = $format
 }
 
 function TaskSetup
@@ -1056,7 +1066,7 @@ Assert
     }
 
     $script:context.push(@{
-                           "formatTaskNameString" = "Executing task: {0}";
+                           "formatTaskName" = "Executing task: {0}";
                            "taskSetupScriptBlock" = $null;
                            "taskTearDownScriptBlock" = $null;
                            "executedTasks" = New-Object System.Collections.Stack;

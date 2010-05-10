@@ -27,7 +27,7 @@ Task Verify -Description "This task verifies psake's variables" {
 		(($variable:context.Peek().tasks.Count -ne 0), 'psake variable: $tasks had length zero'),
 		(($variable:context.Peek().properties.Count -ne 0), 'psake variable: $properties had length zero'),
 		(($variable:context.Peek().includes.Count -eq 0), 'psake variable: $includes should have had length zero'),
-		(($variable:context.Peek().formatTaskNameString -eq "[{0}]"), 'psake variable: $formatTaskNameString was not set correctly'),
+		(($variable:context.Peek().formatTaskName -eq "[{0}]"), 'psake variable: $formatTaskName was not set correctly'),
 		(($variable:context.Peek().currentTaskName -eq "Verify"), 'psake variable: $currentTaskName was not set correctly')		
 	)
 	
