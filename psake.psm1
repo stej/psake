@@ -65,7 +65,7 @@ function ExecuteTask
 
   if (!$precondition_is_valid)
   {
-    "Precondition was false not executing $name"
+    "Precondition was false not executing $taskName"
   }
   else
   {
